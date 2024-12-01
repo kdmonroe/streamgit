@@ -66,8 +66,10 @@ def create_summary(repo_manager, stats):
 def format_dataframe(df, format_owned):
     def highlight_owned(row):
         if format_owned:
-            color = '#e6f3ff' if row['is_owner'] else '#fff0e6'
-            return [f'background-color: {color}' for _ in row]
+            # Darker background colors for better contrast in dark mode
+            color = 'rgba(33, 150, 243, 0.2)' if row['is_owner'] else 'rgba(255, 87, 34, 0.2)'  # Blue vs Orange tints
+            text_color = 'white'  # White text for dark mode
+            return [f'background-color: {color}; color: {text_color}' for _ in row]
         return ['' for _ in row]
     return df.style.apply(highlight_owned, axis=1)
 
@@ -429,7 +431,13 @@ def main():
         if format_owned:
             owned_count = df['is_owner'].sum()
             non_owned_count = len(df) - owned_count
-            st.markdown(f"You own <span style='color:red;font-weight:bold;'>{owned_count}</span> repositories and have access to <span style='color:red;font-weight:bold;'>{non_owned_count}</span> repositories owned by others.", unsafe_allow_html=True)
+            st.markdown(f"""
+                <div style='font-size: 1.1em; margin-bottom: 1em;'>
+                    You <span style='color: #2196F3; font-weight: bold;'>own {owned_count} repositories</span> 
+                    and have access to 
+                    <span style='color: #FF5722; font-weight: bold;'>{non_owned_count} repositories owned by others</span>.
+                </div>
+                """, unsafe_allow_html=True)
 
         st.dataframe(format_dataframe(df, format_owned), use_container_width=True)
         

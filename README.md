@@ -11,7 +11,7 @@ Both interfaces leverage PyGithub to provide real-time insights into your GitHub
 ![StreamGit Stats](/images/demo-stats.png)
 
 ### Prerequisites
-- Python 3.9 or higher 
+- Python 3.9 or higher
 - GitHub Personal Access Token
 
 ### Environment Setup
@@ -60,7 +60,7 @@ The token is required for both the web app and CLI interfaces, but is never stor
 
 ### 1. StreamGit Dashboard
 
-The [StreamGit Dashboard](https://streamgit.streamlit.app) provides an intuitive, interactive interface for real-time GitHub analytics.
+The [StreamGit Dashboard](https://streamgit-io.streamlit.app) provides an intuitive, interactive interface for real-time GitHub analytics.
 
 #### Launch the Dashboard
 ```bash
@@ -108,10 +108,10 @@ git clone https://github.com/keonmonroe/streamgit.git
 cd streamgit
 ```
 
-2. Create and activate virtual environment:
+2. Create and activate the Conda environment:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+conda env create -f environment.yml
+conda activate gh-streamlit
 ```
 
 3. Install dependencies:
