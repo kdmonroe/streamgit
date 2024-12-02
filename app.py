@@ -1,5 +1,4 @@
 import streamlit as st
-from streamlit_option_menu import option_menu
 from github_repo_manager import GithubRepoManager
 import os
 from dotenv import load_dotenv
@@ -46,17 +45,17 @@ def create_summary(repo_manager, stats):
     username = repo_manager.user.login
     return f"""
     <div style='background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-family: "Source Sans Pro", sans-serif; margin-bottom: 20px;'>
-        <h3 style='font-family: "Source Sans Pro", sans-serif; margin-bottom: 15px;'>Successfully authenticated as GitHub user: <span style='color: #1E88E5'>{username}</span></h3>
+        <h3 style='font-family: "Source Sans Pro", sans-serif; margin-bottom: 15px; color: #333;'>Successfully authenticated as GitHub user: <span style='color: #1E88E5'>{username}</span></h3>
         
-        <div style='font-size: 16px; line-height: 2; font-family: "Source Sans Pro", sans-serif; margin-bottom: 10px;'>
+        <div style='font-size: 16px; line-height: 2; font-family: "Source Sans Pro", sans-serif; margin-bottom: 10px; color: #333;'>
             Found a total of <span style='color:{COLORS["total"]};font-weight:bold;font-size:18px;'>{stats["Total Repositories"]}</span> repositories, 
             of which <span style='color:{COLORS["owned"]};font-weight:bold;font-size:18px;'>{stats[f"Owned by {username}"]}</span> are owned by {username}.
         </div>
-        <div style='font-size: 16px; line-height: 2; margin-bottom: 10px; font-family: "Source Sans Pro", sans-serif;'>
+        <div style='font-size: 16px; line-height: 2; margin-bottom: 10px; font-family: "Source Sans Pro", sans-serif; color: #333;'>
             This includes <span style='color:{COLORS["public"]};font-weight:bold;font-size:18px;'>{stats["Public"]}</span> public and 
             <span style='color:{COLORS["private"]};font-weight:bold;font-size:18px;'>{stats["Private"]}</span> private repositories.
         </div>
-        <div style='font-size: 16px; line-height: 2; font-family: "Source Sans Pro", sans-serif;'>
+        <div style='font-size: 16px; line-height: 2; font-family: "Source Sans Pro", sans-serif; color: #333;'>
             Among these, there are <span style='color:{COLORS["forked"]};font-weight:bold;font-size:18px;'>{stats["Forked"]}</span> forked repositories and 
             <span style='color:{COLORS["archived"]};font-weight:bold;font-size:18px;'>{stats["Archived"]}</span> archived repositories.
         </div>
@@ -66,9 +65,9 @@ def create_summary(repo_manager, stats):
 def format_dataframe(df, format_owned):
     def highlight_owned(row):
         if format_owned:
-            # Darker background colors for better contrast in dark mode
-            color = 'rgba(33, 150, 243, 0.2)' if row['is_owner'] else 'rgba(255, 87, 34, 0.2)'  # Blue vs Orange tints
-            text_color = 'white'  # White text for dark mode
+            # Lighter background colors with darker text for better contrast in light mode
+            color = 'rgba(33, 150, 243, 0.1)' if row['is_owner'] else 'rgba(255, 87, 34, 0.1)'  # Lighter Blue vs Orange tints
+            text_color = '#000000'  # Black text for light mode
             return [f'background-color: {color}; color: {text_color}' for _ in row]
         return ['' for _ in row]
     return df.style.apply(highlight_owned, axis=1)
@@ -195,6 +194,54 @@ def save_figure_to_html(fig, filename):
         mime="text/html"
     )
 
+def create_sidebar_menu(user):
+    with st.sidebar:
+        st.markdown(f"""
+            <style>
+            .sidebar-menu {{
+                text-align: center;
+                margin-bottom: 1.5rem;
+            }}
+            .user-info {{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-bottom: 1.5rem;
+            }}
+            .user-info img {{
+                border-radius: 50%;
+                margin-bottom: 0.5rem;
+            }}
+            /* New styles for the menu label */
+            .menu-label {{
+                font-size: 1.2rem;
+                font-weight: bold;
+                text-align: center;
+                margin-bottom: 1rem;
+            }}
+            </style>
+            <div class="sidebar-menu">
+                <div class="brand-name">{BRAND['name']}</div>
+                <div class="brand-tagline">{BRAND['tagline']}</div>
+            </div>
+            <div class="user-info">
+                <img src="{user.avatar_url}" width="100">
+                <p>Welcome, <strong>{user.name}</strong>!</p>
+            </div>
+            <div class="menu-label">Main Menu</div>
+        """, unsafe_allow_html=True)
+        
+        # Update the radio button to include a hidden label
+        selected = st.radio(
+            label="Navigation Menu", 
+            options=["Stats 📊", "Activity 🕒", "Data 📁", "Visualize 📈", "Stars ⭐", "Create 🆕", "Delete 🗑️"],
+            index=0,
+            key="menu",
+            label_visibility="collapsed"  # Hide the label but keep it accessible
+        )
+        
+        return selected
+
 def main():
     st.markdown(f"""
     <style>
@@ -226,52 +273,14 @@ def main():
     repo_manager, error = initialize_repo_manager()
     token_loaded = repo_manager is not None
 
-    # Help information placement and expansion
-    if not token_loaded:
-        display_help_info(expanded=True)
-
     if error:
         st.error(error)
         return
 
     user = repo_manager.user
     
-    # Sidebar with user info
-    with st.sidebar:
-        st.markdown(f"""
-            <style>
-            .brand-header {{
-                text-align: center;
-                margin-bottom: 1.5rem;
-            }}
-            .user-info {{
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                margin-bottom: 1.5rem;
-            }}
-            .user-info img {{
-                border-radius: 50%;
-                margin-bottom: 0.5rem;
-            }}
-            </style>
-            <div class="brand-header">
-                <div class="brand-name">{BRAND['name']}</div>
-                <div class="brand-tagline">{BRAND['tagline']}</div>
-            </div>
-            <div class="user-info">
-                <img src="{user.avatar_url}" width="100">
-                <p>Welcome, <strong>{user.name}</strong>!</p>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        selected = option_menu(
-            menu_title="Main Menu",
-            options=["Stats 📊", "Activity 🕒", "Data 📁", "Visualize 📈", "Stars ⭐", "Create 🆕", "Delete 🗑️"],
-            icons=["graph-up", "clock-history", "folder", "bar-chart", "star", "plus-circle", "trash"],
-            # menu_icon="cast",
-            default_index=0,
-        )
+    # Pass user to create_sidebar_menu
+    selected = create_sidebar_menu(user)
 
     # Main content
     if selected == "Stats 📊":

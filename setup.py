@@ -6,7 +6,6 @@ setup(
     packages=find_packages(),
     install_requires=[
         "streamlit",
-        "streamlit-option-menu",
         "pandas",
         "pygithub",
         "plotly",
@@ -20,7 +19,7 @@ setup(
     },
     author="Keon Monroe",
     author_email="keon.monroe@gmail.com",
-    description="A fluid GitHub analytics tool using PyGithub and Streamlit",
+    description="A GitHub analytics tool using PyGithub and Streamlit",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/keonmonroe/streamgit",
