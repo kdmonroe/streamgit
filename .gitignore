@@ -1,0 +1,12 @@
+__pycache__
+.mypy_cache
+*.pyc
+.DS_Store
+*.egg-info
+.streamlit
+
+*.env
+*.csv
+*.xlsx
+
+!.env.example
